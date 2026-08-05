@@ -18,6 +18,8 @@
 
   const SPOILER_WINDOW = 7;
 
+  const ANALYTICS_CODE = 'exterminadle';
+
   const $ = (id) => document.getElementById(id);
 
   const el = {
@@ -76,6 +78,29 @@
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
     }
+  }
+
+  function startAnalytics() {
+    if (!ANALYTICS_CODE) return;
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://gc.zgo.at/count.js';
+    s.dataset.goatcounter = `https://${ANALYTICS_CODE}.goatcounter.com/count`;
+    document.head.appendChild(s);
+  }
+
+  function track(name) {
+    const gc = window.goatcounter;
+    if (!gc || typeof gc.count !== 'function') return;
+    try {
+      gc.count({ path: name, title: name, event: true });
+    } catch {  }
+  }
+
+  function trackResult() {
+    if (mode === 'practice') return track('practice-played');
+    if (mode === 'archive') return track('archive-played');
+    return track(game.won ? `daily-win-${game.guesses.length}` : 'daily-loss');
   }
 
   function toast(msg, ms = 2200) {
@@ -425,6 +450,7 @@
     }
 
     if (game.done) {
+      trackResult();
       if (!game.won) exterminate();
       if (mode === 'daily') {
         const stats = recordResult(
@@ -637,6 +663,7 @@
     el.game.hidden = false;
     bindEvents();
     render();
+    startAnalytics();
 
     if (!localStorage.getItem(KEY_SEEN_HELP)) {
       openModal(el.help);

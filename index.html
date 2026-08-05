@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exterminadle | Identify the episode or be exterminated</title>
+<meta name="description" content="A daily Doctor Who quote game. Five quotes, five guesses. Identify the episode, or be exterminated.">
+<meta name="theme-color" content="#0b1a3a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#129302;</text></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <h1 class="wordmark">Exterminadle</h1>
+    <p class="tagline">Identify <span class="tagline-tail">or be exterminated</span></p>
+  </div>
+  <div class="topbar-actions">
+    <button type="button" id="btn-archive" class="icon-btn" aria-label="Archive and random puzzles">&#128197;</button>
+    <button type="button" id="btn-help" class="icon-btn" aria-label="How to play">?</button>
+    <button type="button" id="btn-stats" class="icon-btn" aria-label="Statistics">&#9202;</button>
+  </div>
+</header>
+
+<main class="game" id="game" hidden>
+
+  <div class="archive-banner" id="archive-banner" hidden>
+    <span id="banner-text">From the archive. Your stats and streak aren&rsquo;t affected.</span>
+    <span class="banner-actions">
+      <button type="button" class="link-btn" id="btn-another-banner" hidden>Another random episode</button>
+      <button type="button" class="link-btn" id="btn-today">Back to today</button>
+    </span>
+  </div>
+
+  <p class="puzzle-line" id="puzzle-line">
+    Puzzle <span id="puzzle-no">#0</span> &middot; <span id="puzzle-date"></span>
+  </p>
+
+  <ol class="pips" id="pips" aria-label="Attempts used"></ol>
+
+  <section class="quote-stack" id="quote-stack" aria-live="polite" aria-atomic="false">
+
+  </section>
+
+  <section class="guessing" id="guessing">
+    <form class="guess-form" id="guess-form" autocomplete="off">
+      <div class="combo">
+        <input
+          type="text"
+          id="guess-input"
+          class="guess-input"
+          placeholder="Identify the episode&hellip;"
+          aria-label="Identify the episode"
+          role="combobox"
+          aria-expanded="false"
+          aria-autocomplete="list"
+          aria-controls="suggestions"
+          spellcheck="false">
+        <ul class="suggestions" id="suggestions" role="listbox" aria-label="Matching episodes" hidden></ul>
+      </div>
+      <button type="submit" class="submit-btn" id="submit-btn" disabled>Identify</button>
+    </form>
+    <p class="hint-line" id="hint-line">Select from the database. <span id="guesses-left">5</span> attempts remain.</p>
+  </section>
+
+  <section class="result" id="result" hidden aria-live="polite">
+    <p class="result-verdict" id="result-verdict"></p>
+    <div class="answer-card">
+      <h2 class="answer-title" id="answer-title"></h2>
+      <p class="answer-meta" id="answer-meta"></p>
+    </div>
+    <section class="unseen" id="unseen" hidden>
+      <h3 class="unseen-title">Data you did not require</h3>
+      <div class="unseen-list" id="unseen-list"></div>
+    </section>
+
+    <div class="result-actions">
+      <button type="button" class="share-btn" id="btn-share">Transmit result</button>
+      <button type="button" class="secondary-btn" id="btn-another">Play a random episode</button>
+      <button type="button" class="secondary-btn" id="btn-back-today" hidden>Back to today</button>
+    </div>
+    <p class="countdown" id="countdown-line">Next interrogation in <span id="countdown">--:--:--</span></p>
+  </section>
+
+</main>
+
+<p class="loading" id="loading">Initialising&hellip;</p>
+
+<footer class="footer">
+  <p>A fan-made daily game. Not affiliated with or endorsed by the BBC.</p>
+  <p>Transcripts courtesy of <a href="http://www.chakoteya.net/DoctorWho/" rel="noopener" target="_blank">chakoteya.net</a>.</p>
+</footer>
+
+<div class="modal-backdrop" id="modal-backdrop" hidden>
+
+  <div class="modal" id="modal-help" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+    <button type="button" class="close-btn" data-close aria-label="Close">&times;</button>
+    <h2 id="help-title">Operating instructions</h2>
+    <p>You are shown a fragment of dialogue from a <strong>Doctor Who</strong> episode: anything from 2005 onwards, Ninth Doctor through Fifteenth.</p>
+    <p>Identify the episode. Each incorrect attempt releases <strong>another fragment from the same episode</strong>, so it gets easier as you go.</p>
+    <ul class="help-list">
+      <li>You have <strong>5 attempts</strong> and there are <strong>5 fragments</strong>.</li>
+      <li>Fragments get more revealing each round.</li>
+      <li>From the <strong>fourth</strong> fragment onwards, the speaker is identified.</li>
+      <li>Incorrect attempts cost you nothing but a round, and typos cost you nothing at all, since titles are selected from the database.</li>
+      <li><strong>Fail all five and you will be exterminated.</strong></li>
+    </ul>
+    <p>A new episode every day at midnight, your local time. Missed one? The archive
+      (&#128197; above) replays any earlier day, and will drill you on a random episode any time.</p>
+    <p class="help-foot">Only the daily puzzle counts towards your record.</p>
+  </div>
+
+  <div class="modal" id="modal-archive" role="dialog" aria-modal="true" aria-labelledby="archive-title" hidden>
+    <button type="button" class="close-btn" data-close aria-label="Close">&times;</button>
+    <h2 id="archive-title">Temporal archive</h2>
+    <p>Practise on any episode, or replay an earlier day. Neither touches your stats or streak.</p>
+
+    <button type="button" class="random-btn" id="btn-random">Play a random episode</button>
+
+    <div class="date-jump">
+      <label for="archive-date">Jump to a date</label>
+      <input type="date" id="archive-date">
+    </div>
+
+    <h3 class="dist-title">Recent interrogations</h3>
+    <ul class="archive-list" id="archive-list"></ul>
+  </div>
+
+  <div class="modal" id="modal-stats" role="dialog" aria-modal="true" aria-labelledby="stats-title" hidden>
+    <button type="button" class="close-btn" data-close aria-label="Close">&times;</button>
+    <h2 id="stats-title">Combat record</h2>
+    <dl class="stat-row">
+      <div class="stat"><dt>Faced</dt><dd id="st-played">0</dd></div>
+      <div class="stat"><dt>Survived</dt><dd id="st-winpct">0</dd></div>
+      <div class="stat"><dt>Streak</dt><dd id="st-streak">0</dd></div>
+      <div class="stat"><dt>Best</dt><dd id="st-best">0</dd></div>
+    </dl>
+    <h3 class="dist-title">Attempts</h3>
+    <div class="dist" id="dist"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
